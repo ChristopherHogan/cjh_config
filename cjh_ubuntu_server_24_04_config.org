@@ -3,6 +3,9 @@
 #+AUTHOR: Chris Hogan
 #+STARTUP: nologdone
 
+* Improvements
+** TODO git hook for auto tangle
+
 * Global Options
   Output debug info and stop when an error is encountered. Start in home directory.
   #+begin_src bash :tangle yes
