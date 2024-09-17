@@ -1,0 +1,6 @@
+XTerm*faceName: DejaVu Sans Mono Bold:size=11
+XTerm*background: #2E3436
+XTerm*foreground: lightgray
+XTerm.vt100.metaSendsEscape: true
+XTerm*geometry: 90x50
+

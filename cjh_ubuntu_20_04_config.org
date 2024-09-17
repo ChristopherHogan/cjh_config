@@ -1,0 +1,243 @@
+#+TITLE: Ubuntu 20.04 Setup
+#+DATE: <2020-06-11 Thu>
+#+AUTHOR: Chris Hogan
+#+STARTUP: nologdone
+
+* Solid Background Colors
+  This option was removed in 20.04 so we have to restore it.
+** Manual
+    #+begin_src bash
+    sudo apt install -y dconf-editor
+    #+end_src
+*** Open =Dconf Editor= and change the following values:
+   - org.gnome.desktop.background.picture-options
+     - Turn "use default value" switch off
+     - Set "Custom value" to "none"
+     - Apply
+   - org.gnome.desktop.background.primary-color
+     - Set "Custom value" to "#708090"
+** Automated
+    #+begin_src bash
+    sudo apt install -y libglib2.0-bin
+    gsettings set org.gnome.desktop.background picture-options 'none'
+    gsettings set org.gnome.desktop.background primary-color '#708090'
+    #+end_src
+* Terminal Preferences
+** Cursor shape = I-beam
+** Disable bell
+** Use built-in scheme tango dark
+** No scrollback limit
+** Ctl-Alt-T should open 80x56 terminal at 0,0
+  - Disable terminal keyboard shortcut in settings
+  - Add a new Ctl-Alt-T shortcut with =gnome-terminal --geometry 80x56+0+0=
+** Check "Show bold text in bright colors" to get 18.04 terminal colors
+** TODO Automate?
+* Git
+  #+begin_src bash
+  sudo apt install -y git
+  git config --global user.name "Chris Hogan"
+  git config --global user.email "c096h800@gmail.com"
+  git config --global core.editor "vim"
+  # Set default push behavior to only push to a branch of the same name as the active branch
+  git config --global push.default "current"
+  # Generate an ssh key, automatically accepting all defaults
+  ssh-keygen -t rsa -f ~/.ssh/id_rsa -N ''
+  #+end_src
+** Add ssh key to Github
+* Chrome
+   #+begin_src bash
+   sudo apt install -y gdebi-core wget
+   wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+   sudo gdebi google-chrome-stable_current_amd64.deb
+   rm google-chrome-stable_current_amd64.deb
+   #+end_src
+** Install Bitwarden extension
+** Install ublock origin extension
+** Turn on sync to get bookmarks
+** Settings -> On Startup -> Continue where you left off
+* Taskbar
+** Auto hide
+** Auto shrink
+** Favorites
+   - Files
+   - Terminal
+   - Chrome
+   - Emacs
+** TODO Automate?
+* Setup Home Directory
+  #+begin_src bash
+  cd ~
+  rmdir Music/ Pictures/ Videos/ Public/ Templates
+  mkdir dev sw local
+
+  pushd dev
+  git clone git@github.com:ChristopherHogan/misc_hdf
+  popd
+
+  # Install git-aware-prompt
+  pushd ~/sw
+  git clone http://github.com/jimeh/git-aware-prompt.git
+  popd
+
+  # .bashrc
+  rm ~/.bashrc
+  ln -s ${MISC}/chogan_bashrc ~/.bashrc
+
+  # .inputrc
+  rm ~/.inputrc
+  ln -s ${MISC}/chogan_inputrc ~/.inputrc
+
+  # tmux bash completion
+  curl https://raw.githubusercontent.com/imomaliev/tmux-bash-completion/master/completions/tmux > ~/.bash_completion
+
+  # tmux config
+  rm ~/.tmux.conf
+  ln -s ${MISC}/chogan_tmux.conf ~/.tmux.conf
+
+  # ssh config
+  cat << EOF > ~/.ssh/config
+  Host ares
+      HostName ares.cs.iit.edu
+      User chogan
+      Port 22
+      ForwardAgent yes
+      ForwardX11 yes
+      ServerAliveInterval 60
+      IdentitiesOnly yes
+
+  Host jam
+      HostName 206.221.145.51
+      User chogan
+      Port 22
+      ForwardAgent yes
+      ForwardX11 yes
+      ServerAliveInterval 60
+      KexAlgorithms +diffie-hellman-group1-sha1
+  EOF
+  chmod 600 ~/.ssh/config
+
+  # symlink build scripts
+  pushd ~/dev
+  ln -s ~/dev/misc_hdf/build_hermes.sh ~/dev/build_hermes.sh
+  ln -s ~/dev/misc_hdf/build_hdf5.sh ~/dev/build_hdf5.sh
+  popd
+
+  # Global gitignore file
+  cat <<- EOF > ~/.gitignore_global
+  GPATH
+  GRTAGS
+  GTAGS
+  .dir-locals.el
+  EOF
+  git config --global core.excludesfile ~/.gitignore_global
+
+  # TODO xprofile
+   #+end_src
+* Spacemacs
+  #+begin_src bash
+      sudo apt install -y emacs
+      git clone https://github.com/syl20bnr/spacemacs ~/.emacs.d
+      ln -s ~/dev/misc_hdf/dotspacemacs ~/.spacemacs
+
+      # Source code pro
+
+    # Get path to latest OTF release at https://github.com/adobe-fonts/source-code-pro
+    # wget the path
+    mkdir -p ~/.local/share/fonts
+    # unzip OTF fonts in fonts dir
+    fc-cache -f -v
+  #+end_src
+* Misc. Programs
+  #+begin_src bash
+  # APT
+  sudo apt install -y                     \
+    curl                                  \
+    vim                                   \
+    cmake                                 \
+    cmake-curses-gui                      \
+    tmux                                  \
+    exuberant-ctags                       \
+    python3-pygments                      \
+    global                                \
+    silversearcher-ag                     \
+    valgrind                              \
+    kcachegrind                           \
+    sloccount                             \
+    net-tools                             \
+    libfabric-dev                         \
+    autoconf                              \
+    automake                              \
+    libtool                               \
+    libtool-bin                           \
+    libsdl2-dev                           \
+    libmpich-dev                          \
+    gnome-tweak-tool                      \
+    xclip                                 \
+    xterm
+
+  # Miniconda
+  wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh
+  bash ~/miniconda.sh -b -p ${SW}/miniconda
+  rm ~/miniconda.sh
+
+  # GDB Dashboard
+  git clone https://github.com/cyrus-and/gdb-dashboard ~/sw/gdb-dashboard
+  ln -s ~/sw/gdb-dashboard/.gdbinit ~/.gdbinit
+  
+  # Additional dashboard customization
+  cat <<- "EOF" >> ~/.gdbinit
+set disassembly-flavor intel
+
+# Don't step into STL
+define hookpost-run
+  skip file basic_string.h
+  skip file shared_ptr_base.h
+  skip file shared_ptr.h
+  skip file stl_vector.h
+  skip file functional.h
+end
+  
+define mpi_break
+  up
+  up
+  set var gdb_iii = 7
+  b $arg0
+  c
+end
+
+define tlock
+  set scheduler-lock step
+end
+
+# Temp commands
+
+define go
+  b main
+  r
+end
+
+EOF
+
+  mkdir ~/.gdbinit.d
+  # Create file for default options
+  cat << EOF > ~/.gdbinit.d/auto
+  dashboard -layout source stack !assembly !expressions !history !memory !registers !threads !breakpoints !variables
+  dashboard -style prompt '(gdb)'
+  dashboard source -style height 0
+  dashboard stack -style compact True
+  EOF
+
+  # tmpi
+  pushd ${SW}
+  git clone https://github.com/Azrael3000/tmpi
+  ln -s ${SW}/tmpi/tmpi ~/local/bin/tmpi
+  popd
+
+  # fzf
+  # TODO
+
+  # i3 and config
+  # TODO
+  # sudo apt install i3
+  # sudo apt install lxpolkit
+  #+end_src

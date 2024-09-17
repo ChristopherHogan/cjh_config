@@ -1,0 +1,264 @@
+# ~/.bashrc: executed by bash(1) for non-login shells.
+# see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
+# for examples
+
+# If not running interactively, don't do anything
+case $- in
+    *i*) ;;
+      *) return;;
+esac
+
+# Source global definitions
+if [ -f /etc/bashrc ]; then
+    . /etc/bashrc
+fi
+
+# don't put duplicate lines or lines starting with space in the history.
+# See bash(1) for more options
+HISTCONTROL=ignoreboth
+
+# append to the history file, don't overwrite it
+shopt -s histappend
+
+# for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
+HISTSIZE=1000
+HISTFILESIZE=2000
+
+# check the window size after each command and, if necessary,
+# update the values of LINES and COLUMNS.
+shopt -s checkwinsize
+# Expand variables on TAB completion
+shopt -s direxpand
+
+# enable color support of ls and also add handy aliases
+if [ -x /usr/bin/dircolors ]; then
+    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+    alias ls='ls --color=auto'
+    #alias dir='dir --color=auto'
+    #alias vdir='vdir --color=auto'
+
+    alias grep='grep --color=auto'
+    alias fgrep='fgrep --color=auto'
+    alias egrep='egrep --color=auto'
+fi
+
+# SSH key handling
+
+function cjh_ssh_maybe_add_key () {
+    declare -A key_to_email=( [id_rsa]=chogan@home [id_ed25519]=c096h800@gmail.com [work_gh]=c096h800@gmail.com [personal_gh]=litmusik@yahoo.com )
+
+    # Add our key only if it's not already added.
+    EXISTING_KEYS=$(ssh-add -l | cut -f 3 -d ' ')
+    if [[ "${EXISTING_KEYS}" != *"${key_to_email[${1}]}"* ]]; then
+        ssh-add -t ${expiration_time} ${2}
+    else
+        echo "Key exists: ${1}"
+    fi
+}
+
+function cjh_setup_ssh () {
+    local expiration_time=36000
+    local agent_file=~/.ssh-agent
+    local key_location=~/.ssh/${1}
+
+    if [ -z "$PS1" ]; then
+        return;
+    fi
+
+    if [[ $(hostname) = ares* ]] || [[ $(hostname) == ares* ]]; then
+        return;
+    fi
+
+    ssh-add -l &>/dev/null
+    SSH_ADD_RESULT="$?"
+    if [[ ${SSH_ADD_RESULT} == 2 ]]; then
+        # An ssh-agent is not running.
+        test -r ${agent_file} && eval "$(<${agent_file})" # >/dev/null
+        ssh-add -l &>/dev/null
+        SSH_ADD_RESULT="$?"
+        if [ ${SSH_ADD_RESULT} == 2 ]; then
+            (umask 066; ssh-agent > ${agent_file})
+            eval "$(<${agent_file})" # >/dev/null
+            ssh-add -t ${expiration_time} ${key_location}
+        elif [ ${SSH_ADD_RESULT} == 1 ]; then
+            ssh-add -t ${expiration_time} ${key_location}
+        elif [ ${SSH_ADD_RESULT} == 0 ]; then
+            cjh_ssh_maybe_add_key ${1}
+        fi
+    elif [ ${SSH_ADD_RESULT} == 1 ]; then
+        ssh-add -t ${expiration_time} ${key_location}
+    elif [ ${SSH_ADD_RESULT} == 0 ]; then
+        cjh_ssh_maybe_add_key ${1} ${key_location}
+    fi
+}
+
+if [[ "$(hostname)" = DESKTOP-QFABSE9 ]]; then
+    # WSL instance
+    cjh_setup_ssh id_ed25519 
+    cjh_setup_ssh personal_gh
+    # export DISPLAY="$(grep nameserver /etc/resolv.conf | sed 's/nameserver //'):0"
+    # export LIBGL_ALWAYS_INDIRECT=1
+else
+    cjh_setup_ssh id_rsa
+    cjh_setup_ssh id_ed25519
+fi
+
+# User specific aliases and functions
+export WRK=${HOME}
+export DEV=${WRK}/dev
+export SW=${WRK}/sw
+export MISC=${DEV}/misc_hdf
+export LOCAL=${WRK}/.local
+export HF=${DEV}/hdf5
+export MT=${DEV}/multithreaded_hdf5
+export HRMS=${DEV}/hermes
+export HB=${HRMS}/build
+export HC=${WRK}/dev/hdf5blues/h5core
+
+# git-aware-prompt
+export GITAWAREPROMPT=${SW}/git-aware-prompt
+source "${GITAWAREPROMPT}/main.sh"
+export PS1="\[\e[1;32m\]\u@\h \[\e[1;34m\]\W\[\e[0m\] \[$txtcyn\]\$git_branch\[$txtred\]\$git_dirty\[$txtrst\]$ "
+
+# Fix for Tramp mode
+[ $TERM = "dumb" ] && PS1='$ '
+
+alias ll='ls -la'
+alias ga='git add'
+alias gb='git branch'
+alias gc='git commit -m'
+alias gd='git diff'
+alias gre='git remote'
+alias gs='git status'
+alias gp='git push'
+alias gu='git pull origin master'
+alias gco='git checkout'
+
+function sync_fork () {
+    if [[ $# -ne 1 ]]; then
+	echo "Provide a branch argument"
+	exit 1
+    fi
+    git fetch upstream;
+    if [[ $? -eq 0 ]]; then
+        git checkout ${1}
+	if [[ $? -eq 0 ]]; then
+            git merge upstream/${1}
+	    if [[ $? -eq 0 ]]; then
+                git push origin ${1};
+	    fi
+	fi
+    fi
+}
+
+function daily_commit () {
+    if [[ "$(git branch | cut -f 2 -d ' ')" = main ]]; then
+        ga .
+        if [[ $? -eq 0 ]]; then
+            gc "Updates for $(date +%D)."
+            if [[ $? -eq 0 ]]; then
+                gp
+            else
+                echo "git commit failed"
+                return 1
+            fi
+        else
+            echo "git add failed"
+            return 1
+        fi
+    else
+        echo "Not on master branch"
+        return 1
+    fi
+}
+
+function gr () {
+    git rebase -i HEAD~${1}
+}
+
+if [[ $(hostname) = ubuntu-desktop ]]; then
+
+    # Singularity
+    # SINGULARITY_SOURCE=/usr/local/etc/bash_completion.d/singularity
+    # [[ -f ${SINGULARITY_SOURCE} ]] && source ${SINGULARITY_SOURCE}
+
+    # Setup go compiler
+    # export PATH=/usr/local/go/bin:${PATH}
+
+    # setup spack
+    export SPACK_ROOT=${SW}/spack
+    [[ -d ${SPACK_ROOT} ]] && source ${SPACK_ROOT}/share/spack/setup-env.sh
+fi
+
+export PATH=${LOCAL}/bin:${PATH}
+export PATH=${MISC}/bin:${PATH}
+
+# Miniconda
+# export PATH=${SW}/miniconda/bin:${PATH}
+
+# Put metaprogramming tools on the PATH
+export PATH=${MISC}/metaprogramming/bin:${PATH}
+
+# Neovim
+export PATH=${SW}/nvim-linux64/bin:${PATH}
+
+# export LSAN_OPTIONS="suppressions=${DEV}/hermes/test/data/asan.supp"
+
+# Set up xterm customizations
+# xrdb ~/.Xresources
+
+# Bash completion for git aliases
+if [ -f ~/.git-completion.bash ]; then
+    . ~/.git-completion.bash
+
+    __git_complete ga _git_add
+    __git_complete gb _git_branch
+    __git_complete gco _git_checkout
+    __git_complete gp _git_push
+    __git_complete gre _git_remote
+fi
+
+# enable programmable completion features (you don't need to enable
+# this, if it's already enabled in /etc/bash.bashrc and /etc/profile
+# sources /etc/bash.bashrc).
+if ! shopt -oq posix; then
+    if [ -f /usr/share/bash-completion/bash_completion ]; then
+        . /usr/share/bash-completion/bash_completion
+    elif [ -f /etc/bash_completion ]; then
+        . /etc/bash_completion
+    fi
+fi
+
+cd
+
+# Install ruby gems to ~/sw/gems
+# export GEM_HOME=~/sw/gems
+# export PATH=${GEM_HOME}/bin:${PATH}
+
+
+
+# >>> conda initialize >>>
+# !! Contents within this block are managed by 'conda init' !!
+__conda_setup="$('/home/chogan/sw/miniconda3/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
+if [ $? -eq 0 ]; then
+    eval "$__conda_setup"
+else
+    if [ -f "/home/chogan/sw/miniconda3/etc/profile.d/conda.sh" ]; then
+        . "/home/chogan/sw/miniconda3/etc/profile.d/conda.sh"
+    else
+        export PATH="/home/chogan/sw/miniconda3/bin:$PATH"
+    fi
+fi
+unset __conda_setup
+# <<< conda initialize <<<
+
+
+# export PATH="$HOME/.rbenv/bin:$PATH"
+# eval "$(rbenv init - bash)"
+
+
+# export NVM_DIR="$HOME/.nvm"
+# [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+# [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+[ -f ~/.fzf.bash ] && source ~/.fzf.bash

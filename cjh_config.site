@@ -1,0 +1,2 @@
+test -z "$CPPFLAGS" && CPPFLAGS=-I${HOME}/spack_local/include
+test -z "$LDFLAGS" && LDFLAGS="-L${HOME}/spack_local/lib -Wl,-rpath,${HOME}/spack_local/lib"
