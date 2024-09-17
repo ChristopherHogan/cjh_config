@@ -58,22 +58,22 @@ chmod 600 ~/.ssh/config
 mkdir dev sw local
 
 pushd dev
-git clone git@github.com:ChristopherHogan/cjh_config
+git clone https://github.com/ChristopherHogan/cjh_config
 popd
 
 # .bashrc
-rm ~/.bashrc
+rm -f ~/.bashrc
 ln -s ${CJH_CONFIG}/cjh_bashrc ~/.bashrc
 
 # .inputrc
-rm ~/.inputrc
+rm -f ~/.inputrc
 ln -s ${CJH_CONFIG}/cjh_inputrc ~/.inputrc
 
 # tmux bash completion
 curl https://raw.githubusercontent.com/imomaliev/tmux-bash-completion/master/completions/tmux > ~/.bash_completion
 
 # tmux config
-rm ~/.tmux.conf
+rm -f ~/.tmux.conf
 ln -s ${CJH_CONFIG}/cjh_tmux.conf ~/.tmux.conf
 
 # Install git-aware-prompt
@@ -95,7 +95,7 @@ ln -s ${CJH_CONFIG}/cjh_spacemacs_develop ~/.spacemacs
 
 wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh
   bash ~/miniconda.sh -b -p ~/sw/miniconda
-  rm ~/miniconda.sh
+  rm -f ~/miniconda.sh
 
   # GDB Dashboard
   git clone https://github.com/cyrus-and/gdb-dashboard ~/sw/gdb-dashboard
