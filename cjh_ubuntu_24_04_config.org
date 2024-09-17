@@ -1,22 +1,10 @@
-#+TITLE: Ubuntu 20.04 Setup
-#+DATE: <2020-06-11 Thu>
+#+TITLE: Ubuntu 24.04 Setup
+#+DATE: <2024-09-17 Tue>
 #+AUTHOR: Chris Hogan
 #+STARTUP: nologdone
 
 * Solid Background Colors
   This option was removed in 20.04 so we have to restore it.
-** Manual
-    #+begin_src bash
-    sudo apt install -y dconf-editor
-    #+end_src
-*** Open =Dconf Editor= and change the following values:
-   - org.gnome.desktop.background.picture-options
-     - Turn "use default value" switch off
-     - Set "Custom value" to "none"
-     - Apply
-   - org.gnome.desktop.background.primary-color
-     - Set "Custom value" to "#708090"
-** Automated
     #+begin_src bash
     sudo apt install -y libglib2.0-bin
     gsettings set org.gnome.desktop.background picture-options 'none'
@@ -31,7 +19,6 @@
   - Disable terminal keyboard shortcut in settings
   - Add a new Ctl-Alt-T shortcut with =gnome-terminal --geometry 80x56+0+0=
 ** Check "Show bold text in bright colors" to get 18.04 terminal colors
-** TODO Automate?
 * Git
   #+begin_src bash
   sudo apt install -y git
@@ -65,9 +52,10 @@
    - Emacs
 ** TODO Automate?
 * Setup Home Directory
-  #+begin_src bash
+  #+begin_src bash :tangle yes
+  set -xe
+
   cd ~
-  rmdir Music/ Pictures/ Videos/ Public/ Templates
   mkdir dev sw local
 
   pushd dev
@@ -164,14 +152,10 @@
     kcachegrind                           \
     sloccount                             \
     net-tools                             \
-    libfabric-dev                         \
     autoconf                              \
     automake                              \
     libtool                               \
     libtool-bin                           \
-    libsdl2-dev                           \
-    libmpich-dev                          \
-    gnome-tweak-tool                      \
     xclip                                 \
     xterm
 
