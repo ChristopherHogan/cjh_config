@@ -31,12 +31,14 @@
     python3-pygments                      \
     global                                \
     silversearcher-ag                     \
+    ripgrep                               \
     valgrind                              \
     sloccount                             \
     autoconf                              \
     automake                              \
     libtool                               \
     libtool-bin                           \
+    unzip                                 \
     xclip                                 \
     xterm
   #+end_src
@@ -116,7 +118,13 @@
   # fc-cache -f -v
   #+end_src
 * Neovim
-  #+begin_src bash
+  #+begin_src bash :tangle yes
+  pushd ~/sw
+  wget https://github.com/neovim/neovim/releases/download/stable/nvim-linux64.tar.gz
+  tar xf ./nvim-linux64.tar.gz
+  rm ./nvim-linux64.tar.gz
+  ln -s ${CJH_CONFIG}/nvim ~/.config/nvim
+  popd
   #+end_src
 * Miniconda
   #+begin_src bash :tangle yes
