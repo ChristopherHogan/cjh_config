@@ -5,7 +5,6 @@
 
 * Improvements
 ** TODO git hook for auto tangle
-
 * Global Options
   Output debug info and stop when an error is encountered. Start in home directory.
   #+begin_src bash :tangle yes
@@ -76,7 +75,7 @@
 ** Add ssh key to Github
 * Setup Home Directory
   #+begin_src bash :tangle yes
-  mkdir dev sw local
+  mkdir dev sw .local
 
   pushd dev
   git clone https://github.com/ChristopherHogan/cjh_config
@@ -119,58 +118,59 @@
 * Neovim
   #+begin_src bash
   #+end_src
-* Misc. Programs
+* Miniconda
   #+begin_src bash :tangle yes
   wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh
   bash ~/miniconda.sh -b -p ~/sw/miniconda
   rm -f ~/miniconda.sh
-
-  # GDB Dashboard
+  #+end_src
+* GDB Dashboard
+  #+begin_src bash :tangle yes
   git clone https://github.com/cyrus-and/gdb-dashboard ~/sw/gdb-dashboard
   ln -s ~/sw/gdb-dashboard/.gdbinit ~/.gdbinit
 
   # Additional dashboard customization
   cat <<- "EOF" >> ~/.gdbinit
-set disassembly-flavor intel
+  set disassembly-flavor intel
 
-# Don't step into STL
-define hookpost-run
-  skip file basic_string.h
-  skip file shared_ptr_base.h
-  skip file shared_ptr.h
-  skip file stl_vector.h
-  skip file functional.h
-end
+  # Don't step into STL
+  define hookpost-run
+    skip file basic_string.h
+    skip file shared_ptr_base.h
+    skip file shared_ptr.h
+    skip file stl_vector.h
+    skip file functional.h
+  end
 
-define mpi_break
-  up
-  up
-  set var gdb_iii = 7
-  b $arg0
-  c
-end
+  define mpi_break
+    up
+    up
+    set var gdb_iii = 7
+    b $arg0
+    c
+  end
 
-define tlock
-  set scheduler-lock step
-end
+  define tlock
+    set scheduler-lock step
+  end
 
-# Temp commands
+  # Temp commands
 
-define go
-  b main
-  r
-end
+  define go
+    b main
+    r
+  end
 
-EOF
+  EOF
 
   mkdir ~/.gdbinit.d
   # Create file for default options
   cat << EOF > ~/.gdbinit.d/auto
-dashboard -layout source stack !assembly !expressions !history !memory !registers !threads !breakpoints !variables
-dashboard -style prompt '(gdb)'
-dashboard source -style height 0
-dashboard stack -style compact True
-EOF
+  dashboard -layout source stack !assembly !expressions !history !memory !registers !threads !breakpoints !variables
+  dashboard -style prompt '(gdb)'
+  dashboard source -style height 0
+  dashboard stack -style compact True
+  EOF
 
   # tmpi
   # pushd ${SW}
