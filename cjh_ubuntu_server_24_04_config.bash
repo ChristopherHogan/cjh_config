@@ -55,7 +55,7 @@ Host github.com
 EOF
 chmod 600 ~/.ssh/config
 
-mkdir dev sw local
+mkdir dev sw .local
 
 pushd dev
 git clone https://github.com/ChristopherHogan/cjh_config
@@ -94,15 +94,14 @@ ln -s ${CJH_CONFIG}/cjh_spacemacs_develop ~/.spacemacs
 # fc-cache -f -v
 
 wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh
-  bash ~/miniconda.sh -b -p ~/sw/miniconda
-  rm -f ~/miniconda.sh
+bash ~/miniconda.sh -b -p ~/sw/miniconda
+rm -f ~/miniconda.sh
 
-  # GDB Dashboard
-  git clone https://github.com/cyrus-and/gdb-dashboard ~/sw/gdb-dashboard
-  ln -s ~/sw/gdb-dashboard/.gdbinit ~/.gdbinit
+git clone https://github.com/cyrus-and/gdb-dashboard ~/sw/gdb-dashboard
+ln -s ~/sw/gdb-dashboard/.gdbinit ~/.gdbinit
 
-  # Additional dashboard customization
-  cat <<- "EOF" >> ~/.gdbinit
+# Additional dashboard customization
+cat <<- "EOF" >> ~/.gdbinit
 set disassembly-flavor intel
 
 # Don't step into STL
@@ -135,19 +134,19 @@ end
 
 EOF
 
-  mkdir ~/.gdbinit.d
-  # Create file for default options
-  cat << EOF > ~/.gdbinit.d/auto
+mkdir ~/.gdbinit.d
+# Create file for default options
+cat << EOF > ~/.gdbinit.d/auto
 dashboard -layout source stack !assembly !expressions !history !memory !registers !threads !breakpoints !variables
 dashboard -style prompt '(gdb)'
 dashboard source -style height 0
 dashboard stack -style compact True
 EOF
 
-  # tmpi
-  # pushd ${SW}
-  # git clone https://github.com/Azrael3000/tmpi
-  # ln -s ${SW}/tmpi/tmpi ~/local/bin/tmpi
-  # popd
+# tmpi
+# pushd ${SW}
+# git clone https://github.com/Azrael3000/tmpi
+# ln -s ${SW}/tmpi/tmpi ~/local/bin/tmpi
+# popd
 
-  # TODO fzf
+# TODO fzf
