@@ -19,12 +19,14 @@ sudo apt install -y                     \
   python3-pygments                      \
   global                                \
   silversearcher-ag                     \
+  ripgrep                               \
   valgrind                              \
   sloccount                             \
   autoconf                              \
   automake                              \
   libtool                               \
   libtool-bin                           \
+  unzip                                 \
   xclip                                 \
   xterm
 
@@ -92,6 +94,13 @@ ln -s ${CJH_CONFIG}/cjh_spacemacs_develop ~/.spacemacs
 # mkdir -p ~/.local/share/fonts
 # unzip OTF fonts in fonts dir
 # fc-cache -f -v
+
+pushd ~/sw
+wget https://github.com/neovim/neovim/releases/download/stable/nvim-linux64.tar.gz
+tar xf ./nvim-linux64.tar.gz
+rm ./nvim-linux64.tar.gz
+ln -s ${CJH_CONFIG}/nvim ~/.config/nvim
+popd
 
 wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh
 bash ~/miniconda.sh -b -p ~/sw/miniconda
