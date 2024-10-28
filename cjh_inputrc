@@ -1,14 +1,35 @@
+set bell-style none
+
+set keymap vi-insert
+
 TAB: menu-complete
 "\e[Z": menu-complete-backward
 
-set bell-style none
+"\C-a": beginning-of-line
+"\C-e": end-of-line
+"\C-f": forward-char
+"\C-b": backward-char
+"\M-f": forward-word
+"\M-b": backward-word
+"\C-l": clear-screen
 
-# set editing-mode vi
-#
-# set vi-ins-mode-string \1\e[5 q\e]12;green\a\2
-# set vi-cmd-mode-string \1\e[1 q\e]12;orange\a\2
-#
-# set show-mode-in-prompt on
+"\C-p": previous-history
+"\C-n": next-history
+"\C-r": reverse-search-history
+
+"\C-d": delete-char
+"\b": backward-delete-char
+"\C-k": kill-line
+"\C-u": unix-line-discard
+# "\e-d": kill-word
+"\e\177": backward-kill-word
+
+"fd": vi-movement-mode
+
+set editing-mode vi
+set vi-ins-mode-string \1\e[5 q\e]12;white\a\2
+set vi-cmd-mode-string \1\e[1 q\e]12;orange\a\2
+set show-mode-in-prompt on
 
 $if gdb
     "\C-\M-p": "\C-a\C-kserver dashboard source scroll -1\n\C-y"
