@@ -606,6 +606,9 @@ before packages are loaded."
     (require 'org-table)
     (require 'org-clock)
 
+    ;; Hide emphasis markers (=...=) in org files
+    (setq org-hide-emphasis-markers t)
+
     ;; Set agenda file
     (setq org-agenda-files (list "/home/chogan/dev/archive/20230810154142-todo.org"))
 
