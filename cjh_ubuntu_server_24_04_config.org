@@ -187,5 +187,8 @@
   # ln -s ${SW}/tmpi/tmpi ~/local/bin/tmpi
   # popd
 
-  # TODO fzf
+  #+end_src
+* TODO FZF
+  #+begin_src bash :tangle yes
+  https://github.com/junegunn/fzf
   #+end_src
