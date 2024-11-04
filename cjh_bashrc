@@ -123,7 +123,7 @@ alias gd='git diff'
 alias gre='git remote'
 alias gs='git status'
 alias gp='git push'
-alias gu='git pull origin master'
+alias gu='git pull'
 alias gco='git checkout'
 
 function sync_fork () {
