@@ -892,8 +892,8 @@ before packages are loaded."
 
   (setq spacemacs-theme-comment-bg nil)
   (setq c-default-style "linux")
-  (setq-default tab-width 2)
-  (setq-default c-basic-offset 2)
+  (setq-default tab-width 4)
+  (setq-default c-basic-offset 4)
 
   (defun cjh-revert-modeline (timer fg bg)
     (cancel-timer timer)
