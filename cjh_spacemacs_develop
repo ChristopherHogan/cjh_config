@@ -894,6 +894,7 @@ before packages are loaded."
   (setq c-default-style "linux")
   (setq-default tab-width 4)
   (setq-default c-basic-offset 4)
+  (setq-default indent-tabs-mode nil)
 
   (defun cjh-revert-modeline (timer fg bg)
     (cancel-timer timer)
