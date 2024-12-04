@@ -232,8 +232,6 @@ if ! shopt -oq posix; then
     fi
 fi
 
-cd
-
 # Miniconda
 if [[ -d "${SW}/miniconda" ]]; then
     export PATH=${SW}/miniconda/bin:${PATH}
