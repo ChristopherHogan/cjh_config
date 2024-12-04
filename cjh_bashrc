@@ -92,7 +92,7 @@ function cjh_setup_ssh () {
     fi
 }
 
-if [[ $"(uname)" = Linux ]]; then
+if [[ "$(uname)" = Linux ]]; then
     if [[ "$(hostname)" = DESKTOP-QFABSE9 ]]; then
         # WSL instance
         cjh_setup_ssh id_ed25519
@@ -105,7 +105,7 @@ if [[ $"(uname)" = Linux ]]; then
 fi
 
 # User specific aliases and functions
-if [[ $"(uname)" = Linux ]]; then
+if [[ "$(uname)" = Linux ]]; then
     MYHOME=${HOME}
 else
     MYHOME=/d
@@ -192,7 +192,7 @@ test -d "${LOCAL}/bin" && export PATH=${LOCAL}/bin:${PATH}
 # export PATH=${MISC}/metaprogramming/bin:${PATH}
 
 # Neovim
-if [[ $"(uname)" = Linux ]]; then
+if [[ "$(uname)" = Linux ]]; then
     NVIM_OS=linux
 else
     NVIM_OS=win
@@ -205,7 +205,7 @@ test -d ${SW}/nvim-${NVIM_OS}64/bin && export PATH=${SW}/nvim-${NVIM_OS}64/bin:$
 # xrdb ~/.Xresources
 
 # Bash completion for git aliases
-if [[ $"(uname)" = Linux ]]; then
+if [[ "$(uname)" = Linux ]]; then
     GIT_COMPLETION=~/.git-completion.bash
 else
     GIT_COMPLETION=/c/Program\ Files/Git/mingw64/share/git/completion/git-completion.bash
