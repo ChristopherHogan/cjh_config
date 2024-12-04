@@ -92,20 +92,30 @@ function cjh_setup_ssh () {
     fi
 }
 
-if [[ "$(hostname)" = DESKTOP-QFABSE9 ]]; then
-    # WSL instance
-    cjh_setup_ssh id_ed25519
-    cjh_setup_ssh personal_gh
-    # export DISPLAY="$(grep nameserver /etc/resolv.conf | sed 's/nameserver //'):0"
-    # export LIBGL_ALWAYS_INDIRECT=1
-else
-    cjh_setup_ssh id_ed25519_ch
+if [[ $"(uname)" = Linux ]]; then
+    if [[ "$(hostname)" = DESKTOP-QFABSE9 ]]; then
+        # WSL instance
+        cjh_setup_ssh id_ed25519
+        cjh_setup_ssh personal_gh
+        # export DISPLAY="$(grep nameserver /etc/resolv.conf | sed 's/nameserver //'):0"
+        # export LIBGL_ALWAYS_INDIRECT=1
+    else
+        cjh_setup_ssh id_ed25519_ch
+    fi
 fi
 
 # User specific aliases and functions
-export DEV=${HOME}/dev
-export SW=${HOME}/sw
-export LOCAL=${HOME}/.local
+if [[ $"(uname)" = Linux ]]; then
+    MYHOME=${HOME}
+else
+    MYHOME=/d
+fi
+
+export DEV=${MYHOME}/dev
+export SW=${MYHOME}/sw
+export CJH=${DEV}/cjh_config
+export LOCAL=${MYHOME}/.local
+export HA=${DEV}/Compute-Fabric-HostAgent
 
 # git-aware-prompt
 export GITAWAREPROMPT=${SW}/git-aware-prompt
@@ -128,18 +138,18 @@ alias gco='git checkout'
 
 function sync_fork () {
     if [[ $# -ne 1 ]]; then
-	echo "Provide a branch argument"
-	exit 1
+        echo "Provide a branch argument"
+        exit 1
     fi
     git fetch upstream;
     if [[ $? -eq 0 ]]; then
         git checkout ${1}
-	if [[ $? -eq 0 ]]; then
+        if [[ $? -eq 0 ]]; then
             git merge upstream/${1}
-	    if [[ $? -eq 0 ]]; then
+            if [[ $? -eq 0 ]]; then
                 git push origin ${1};
-	    fi
-	fi
+            fi
+        fi
     fi
 }
 
@@ -168,30 +178,18 @@ function gr () {
     git rebase -i HEAD~${1}
 }
 
-if [[ $(hostname) = ubuntu-desktop ]]; then
-
-    # Singularity
-    # SINGULARITY_SOURCE=/usr/local/etc/bash_completion.d/singularity
-    # [[ -f ${SINGULARITY_SOURCE} ]] && source ${SINGULARITY_SOURCE}
-
-    # Setup go compiler
-    # export PATH=/usr/local/go/bin:${PATH}
-
-    # setup spack
-    export SPACK_ROOT=${SW}/spack
-    [[ -d ${SPACK_ROOT} ]] && source ${SPACK_ROOT}/share/spack/setup-env.sh
-fi
-
-export PATH=${LOCAL}/bin:${PATH}
-
-# Miniconda
-export PATH=${SW}/miniconda/bin:${PATH}
+test -d "${LOCAL}/bin" && export PATH=${LOCAL}/bin:${PATH}
 
 # Put metaprogramming tools on the PATH
 # export PATH=${MISC}/metaprogramming/bin:${PATH}
 
 # Neovim
-export PATH=${SW}/nvim-linux64/bin:${PATH}
+if [[ $"(uname)" = Linux ]]; then
+    NVIM_OS=linux
+else
+    NVIM_OS=win
+fi
+test -d ${SW}/nvim-${NVIM_OS}64/bin && export PATH=${SW}/nvim-${NVIM_OS}64/bin:${PATH}
 
 # export LSAN_OPTIONS="suppressions=${DEV}/hermes/test/data/asan.supp"
 
@@ -199,8 +197,14 @@ export PATH=${SW}/nvim-linux64/bin:${PATH}
 # xrdb ~/.Xresources
 
 # Bash completion for git aliases
-if [ -f ~/.git-completion.bash ]; then
-    . ~/.git-completion.bash
+if [[ $"(uname)" = Linux ]]; then
+    GIT_COMPLETION=~/.git-completion.bash
+else
+    GIT_COMPLETION=/c/Program\ Files/Git/mingw64/share/git/completion/git-completion.bash
+fi
+
+if [ -f "${GIT_COMPLETION}" ]; then
+    . "${GIT_COMPLETION}"
 
     __git_complete ga _git_add
     __git_complete gb _git_branch
@@ -222,34 +226,23 @@ fi
 
 cd
 
-# Install ruby gems to ~/sw/gems
-# export GEM_HOME=~/sw/gems
-# export PATH=${GEM_HOME}/bin:${PATH}
-
-
-
-# >>> conda initialize >>>
-# !! Contents within this block are managed by 'conda init' !!
-__conda_setup="$('/home/chogan/sw/miniconda3/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
-if [ $? -eq 0 ]; then
-    eval "$__conda_setup"
-else
-    if [ -f "/home/chogan/sw/miniconda3/etc/profile.d/conda.sh" ]; then
-        . "/home/chogan/sw/miniconda3/etc/profile.d/conda.sh"
+# Miniconda
+if [[ -d "${SW}/miniconda" ]]; then
+    export PATH=${SW}/miniconda/bin:${PATH}
+    # >>> conda initialize >>>
+    # !! Contents within this block are managed by 'conda init' !!
+    __conda_setup="$('/home/chogan/sw/miniconda3/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
+    if [ $? -eq 0 ]; then
+        eval "$__conda_setup"
     else
-        export PATH="/home/chogan/sw/miniconda3/bin:$PATH"
+        if [ -f "/home/chogan/sw/miniconda3/etc/profile.d/conda.sh" ]; then
+            . "/home/chogan/sw/miniconda3/etc/profile.d/conda.sh"
+        else
+            export PATH="/home/chogan/sw/miniconda3/bin:$PATH"
+        fi
     fi
+    unset __conda_setup
+    # <<< conda initialize <<<
 fi
-unset __conda_setup
-# <<< conda initialize <<<
-
-
-# export PATH="$HOME/.rbenv/bin:$PATH"
-# eval "$(rbenv init - bash)"
-
-
-# export NVM_DIR="$HOME/.nvm"
-# [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-# [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
