@@ -120,7 +120,15 @@ export HA=${DEV}/Compute-Fabric-HostAgent
 # git-aware-prompt
 export GITAWAREPROMPT=${SW}/git-aware-prompt
 source "${GITAWAREPROMPT}/main.sh"
-export PS1="\[\e[1;32m\]\u@\h \[\e[1;34m\]\W\[\e[0m\] \[$txtcyn\]\$git_branch\[$txtred\]\$git_dirty\[$txtrst\]$ "
+
+if [[ "$(uname)" = Linux ]]; then
+    MYUSER=\\u
+    MYHOST=\\h
+else
+    MYUSER=chris
+    MYHOST=work
+fi
+export PS1="\[\e[1;32m\]${MYUSER}@${MYHOST} \[\e[1;34m\]\W\[\e[0m\] \[$txtcyn\]\$git_branch\[$txtred\]\$git_dirty\[$txtrst\]$ "
 
 # Fix for Tramp mode
 [ $TERM = "dumb" ] && PS1='$ '
