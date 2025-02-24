@@ -20,6 +20,7 @@ set keymap vi-insert
 "\C-u": unix-line-discard
 # "\e-d": kill-word
 "\e\177": backward-kill-word
+"\M-\b": backward-kill-word
 
 "fd": vi-movement-mode
 
